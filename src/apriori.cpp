@@ -148,7 +148,7 @@ void Apriori::printRulesMined(){
 		printSet(ruleMined.set);
 		std::cout << " -> " ; 
 		printSet(ruleMined.recomendedSet);
-		std::cout << " congf: " << ruleMined.conf << std::endl;
+		std::cout << " confidence: " << ruleMined.conf << std::endl;
 	}
 }
 
