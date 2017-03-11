@@ -1,5 +1,8 @@
-A,C,D
-A,B,C,E
-B,C,E
-B,E
-A,B,C,F
+pintura,masilla,clavo
+pintura,brocha 
+pintura,clavo,martillo 
+pintura,masilla,clavo,brocha 
+pintura,masilla,clavo,martillo
+pintura,brocha 
+pintura,martillo
+pintura,clavo

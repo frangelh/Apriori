@@ -2,7 +2,7 @@
 #include "apriori.hpp"
 int main(int argc,char** arg){
     std::string filename = "entrada";
-	double support = 1;
+	double support = 0.1;
 	double conf = 0;
     if(argc > 1) filename = std::string(arg[1]);
     if(argc > 2) support = atof(arg[2]);
