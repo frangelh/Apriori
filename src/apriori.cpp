@@ -5,13 +5,17 @@ Apriori::Apriori(){
 	conf = 0;
 }
 
-Apriori::Apriori(double minSupport,double conf){
+Apriori::Apriori(int minSupport,double conf){
 	this->minSupport = minSupport;
 	this->conf = conf;
 }
 double Apriori::getSupport(const std::set<std::string> &subset){
-	return(double)supportCount(subset)/tranactions.size();
+	return(double)getSupportCount(subset)/tranactions.size();
 }
+double Apriori::getConfidence(const std::set<std::string> &SetS,const std::set<std::string> &SetSMinsI){
+	return getSupportCount(SetS)/getSupportCount(SetSMinsI);
+}
+
 void Apriori::fillWithFile(std::string filename){
 	std::ifstream file(filename.c_str());
 	std::string buffLine;
@@ -28,7 +32,7 @@ void Apriori::fillWithFile(std::string filename){
 		transline++;
 	}
 }
-int Apriori::supportCount(const std::set<std::string> &subItemSet){
+int Apriori::getSupportCount(const std::set<std::string> &subItemSet){
 	int freq= 0 ;
 	for(auto &X:tranactions){
 		if(std::includes(X.begin(),X.end(),subItemSet.begin(),subItemSet.end())){
@@ -38,8 +42,11 @@ int Apriori::supportCount(const std::set<std::string> &subItemSet){
 	return freq;
 }
 
-void Apriori::doCombinations(const std::set<std::string> &elements,int k,std::vector< std::set<std::string> > &comb){
-	if(k==1){
+void Apriori::doCombinations(const std::set<std::string> &elements,const int &k,std::vector< std::set<std::string> > &comb){
+	if (k > elements.size()){
+		return;
+	}
+	else if(k==1){
 		comb.push_back(elements);
 		return;
 	}
@@ -68,16 +75,30 @@ void print(std::set<std::string> set){
 	}
 	std::cout << std::endl;
 }
-void Apriori::create(){
-	for(int i=1; i <= subSupportSet.size();i++){
+void Apriori::createFrequentSets(){
+	std::vector<std::set<std::string> > currentInterationSet;
+	std::set<std::string> currentSubset(subSupportSet);
+	for(int i=1 ; i <= subSupportSet.size() ; i++){
+		frequentSets.clear();
 		std::vector<std::set<std::string> >comb;
-		doCombinations(subSupportSet,i,comb);
-		for(auto &X:comb){
-			if(getSupport(X) >= minSupport){
-				frequentSets.push_back(X);
+		doCombinations(currentSubset,i,comb);
+		for(int i = 0; i < comb.size();i++){
+			if(getSupportCount(comb[i]) >= minSupport){
+				frequentSets.push_back(comb[i]);
 			}
 		}
+		if(frequentSets.size() == 0){
+			// break;
+		}
+		else{
+			currentSubset.clear();
+			for(auto &FreqSet:frequentSets){
+				currentSubset.insert(FreqSet.begin(),FreqSet.end());
+			}
+			currentInterationSet = frequentSets;
+		}
 	}
+	frequentSets = currentInterationSet;
 }
 void Apriori::printResults(){
 	std::cout << "Requent Sets [" << frequentSets.size() << "]" << std::endl;
@@ -85,7 +106,7 @@ void Apriori::printResults(){
 		 for(auto &Y:X){
 			std::cout << Y << " ";	
 		 }
-		 std::cout << " with support " << std::to_string(getSupport(X)) << std::endl;
+		 std::cout << " with support " << std::to_string(getSupportCount(X)) << std::endl;
 	}
 }
 void Apriori::printTransactions(){

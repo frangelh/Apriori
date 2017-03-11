@@ -1,8 +1,5 @@
-pintura,masilla,clavo
-pintura,brocha 
-pintura,clavo,martillo 
-pintura,masilla,clavo,brocha 
-pintura,masilla,clavo,martillo
-pintura,brocha 
-pintura,martillo
-pintura,clavo
+1,3,4
+2,3,5
+1,2,3,5
+2,5
+1,3,5
