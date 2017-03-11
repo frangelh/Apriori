@@ -1,19 +1,52 @@
 #include "apriori.hpp"
 
-Apriori::Apriori(){
-	minSupport = 0;
-	conf = 0;
+void printSet(std::set<std::string> set){
+	for(auto &X:set){
+		std::cout << X << " ";
+	}
 }
 
-Apriori::Apriori(int minSupport,double conf){
-	this->minSupport = minSupport;
-	this->conf = conf;
+Apriori::Apriori(){
+	minSupport = 0;
+	minconf = 0;
 }
+
+Apriori::Apriori(int minSupport,double minconf){
+	this->minSupport = minSupport;
+	this->minconf = minconf;
+}
+
+void Apriori::mineRules(){
+	for(auto &frequentSet:frequentSets){
+		for(int i =1 ;i < frequentSet.size();i++){
+			std::vector <std::set<std::string>> combination;
+			doCombinations(frequentSet,i,combination);
+			for(auto currentSet:combination){
+				double confidence = getConfidence(frequentSet,currentSet);
+				if(confidence >= minconf){
+					MinedRule minedRule;
+					minedRule.set = currentSet;
+					minedRule.conf = confidence;
+					std::set <std::string> diff;
+					std::set_difference(frequentSet.begin(), frequentSet.end(), currentSet.begin(), currentSet.end(), std::inserter(diff, diff.begin()));
+					minedRule.recomendedSet = diff;
+					rulesMined.push_back(minedRule);
+				} 
+			}
+		}
+	}
+}
+
+void Apriori::execute(){
+	createFrequentSets();
+	mineRules();
+}
+
 double Apriori::getSupport(const std::set<std::string> &subset){
 	return(double)getSupportCount(subset)/tranactions.size();
 }
 double Apriori::getConfidence(const std::set<std::string> &SetS,const std::set<std::string> &SetSMinsI){
-	return getSupportCount(SetS)/getSupportCount(SetSMinsI);
+	return (double)getSupportCount(SetS)/getSupportCount(SetSMinsI);
 }
 
 void Apriori::fillWithFile(std::string filename){
@@ -47,7 +80,7 @@ void Apriori::doCombinations(const std::set<std::string> &elements,const int &k,
 		return;
 	}
 	else if(k==1){
-		comb.push_back(elements);
+		for(auto &element:elements) comb.push_back(std::set<std::string>{element});
 		return;
 	}
 	auto getWithOffset = [&](std::set<std::string> ele,int offset,int number) -> std::set<std::string>{
@@ -69,12 +102,7 @@ void Apriori::doCombinations(const std::set<std::string> &elements,const int &k,
 		}
 	}
 }
-void print(std::set<std::string> set){
-	for(auto &X:set){
-		std::cout << X << " ";
-	}
-	std::cout << std::endl;
-}
+
 void Apriori::createFrequentSets(){
 	std::vector<std::set<std::string> > currentInterationSet;
 	std::set<std::string> currentSubset(subSupportSet);
@@ -82,13 +110,13 @@ void Apriori::createFrequentSets(){
 		frequentSets.clear();
 		std::vector<std::set<std::string> >comb;
 		doCombinations(currentSubset,i,comb);
-		for(int i = 0; i < comb.size();i++){
-			if(getSupportCount(comb[i]) >= minSupport){
-				frequentSets.push_back(comb[i]);
+		for(int j = 0; j < comb.size();j++){
+			if(getSupportCount(comb[j]) >= minSupport){
+				frequentSets.push_back(comb[j]);
 			}
 		}
 		if(frequentSets.size() == 0){
-			// break;
+			break;
 		}
 		else{
 			currentSubset.clear();
@@ -100,18 +128,34 @@ void Apriori::createFrequentSets(){
 	}
 	frequentSets = currentInterationSet;
 }
-void Apriori::printResults(){
-	std::cout << "Requent Sets [" << frequentSets.size() << "]" << std::endl;
+void Apriori::printFrequentSets(){
+	std::cout << "Frequent Sets [" << frequentSets.size() << "]" << std::endl;
+	int i=1;
  	for(auto &X:frequentSets){
+		std::cout << "["<< i++ << "] ";
 		 for(auto &Y:X){
 			std::cout << Y << " ";	
 		 }
 		 std::cout << " with support " << std::to_string(getSupportCount(X)) << std::endl;
 	}
 }
+void Apriori::printRulesMined(){
+	std::cout << "Rules [" << rulesMined.size() << "]" << std::endl;
+	int i=1;
+	for(auto &ruleMined:rulesMined){
+		std::cout << "["<< i++ << "] ";
+		printSet(ruleMined.set);
+		std::cout << " -> " ; 
+		printSet(ruleMined.recomendedSet);
+		std::cout << " congf: " << ruleMined.conf << std::endl;
+	}
+}
+
 void Apriori::printTransactions(){
-	std::cout << "Transactions" << std::endl;
+	int i=1;
+	std::cout << "Transactions [" << tranactions.size() << "]" << std::endl;
 	for(auto &X:tranactions){
+		std::cout << "["<< i++ << "] ";
 		for(auto &Y:X){
 			std::cout << Y << " ";
 		}

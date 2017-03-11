@@ -11,27 +11,29 @@
 typedef struct{
 	std::set<std::string> set;
 	std::set<std::string> recomendedSet;
-	double support;
 	double conf;
-}MinedSets;
+}MinedRule;
 class Apriori{
 	private:
         int minSupport;
-        double conf;
+        double minconf;
 		std::vector <std::set<std::string> > frequentSets;
 		std::vector <std::set<std::string> > tranactions;
-		std::vector<MinedSets> rulesMined;
+		std::vector<MinedRule> rulesMined;
 		std::set<std::string> subSupportSet; 
+		void mineRules();
+		void createFrequentSets();
     public:
         Apriori();
-        Apriori(int minSupport,double conf);
+        Apriori(int minSupport,double minconf);
 		void fillWithFile(std::string filename);
-		void createFrequentSets();
+		void execute();
 		int getSupportCount(const std::set<std::string> &subItemSet);
 		double getSupport(const std::set<std::string> &subset);
 		double getConfidence(const std::set<std::string> &SetS,const std::set<std::string> &SetSMinsI);
 		void doCombinations(const std::set<std::string> &elements,const int &k,std::vector< std::set<std::string> > &comb);
 		void printTransactions();
-		void printResults();
+		void printFrequentSets();
+		void printRulesMined();
 };
 #endif
