@@ -54,6 +54,7 @@ void Apriori::fillWithFile(std::string filename){
 	std::string buffLine;
 	int transline=0;
 	while(std::getline(file,buffLine)){
+		if(buffLine =="") continue;
 		std::stringstream ss(buffLine);
 		std::set<std::string> elemens;
 		std::string ele;
